@@ -1,20 +1,22 @@
-import 'dart:math';
-
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as prefix0;
-import 'package:flutter_linkimager/mocks/ProjectsMock.dart';
+import 'package:flutter_linkimager/app/activities/ImagerEdit.dart';
+
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../Types.dart';
 import '../../ViewModel.dart';
+import 'Helpers.dart';
 
 class ImagerView extends StatefulWidget {
-  final LinkImage project = Projects.one;
+  final LinkImage project;
+  final ViewModel viewModel;
+  // const ImagerView({Key key, this.project}): super(key: key);
+  ImagerView(this.project, this.viewModel);
 
   @override
-  State<StatefulWidget> createState() => _ImagerViewState(project, ViewModel());
+  State<StatefulWidget> createState() => _ImagerViewState(project, viewModel);
 }
 
 class _ImagerViewState extends State<ImagerView>
@@ -35,39 +37,62 @@ class _ImagerViewState extends State<ImagerView>
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async => false,
-      child: Stack(children: <Widget>[
-        FractionallySizedBox(
-          child: Stack(
-              children: List.from(areas(currentLinkImage.links))
-                ..insert(
-                  0,
-                  Image.network(currentLinkImage.url,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover),
-                )),
-          widthFactor: 1,
-          heightFactor: 1,
-          key: _key,
-        ),
-        Positioned(
-          child: AppBar(
-            title: Text("Hello!"),
-            backgroundColor: Color.fromARGB(20, 1, 1, 1), // transparent
-            elevation: 0, // remove shadow
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios),
-              onPressed: () => _navigateBack(currentLinkImage),
-              )
+        onWillPop: () async => false,
+        child: Stack(
+          children: <Widget>[
+            FractionallySizedBox(
+              child: Stack(
+                  children: List.from(areas(currentLinkImage.links))
+                    ..insert(
+                      0,
+                      Image.network(currentLinkImage.url,
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover),
+                    )),
+              widthFactor: 1,
+              heightFactor: 1,
+              key: _key,
             ),
-          left: 0,
-          top: 0,
-          right: 0,
-          )
-        ]
-      ),
-    );
+            Align(
+              child: Column(
+                children: <Widget>[
+                  Material(
+                      child: IconButton(
+                    icon: Icon(Icons.text_fields),
+                    onPressed: () {
+                      debugPrint("pressed text!");
+                    },
+                  ),
+                  color: Color.fromARGB(0, 0, 0, 0),
+                  )
+                ],
+              ),
+              alignment: Alignment.centerRight,
+            ),
+            Positioned(
+                child: AppBar(
+                  title: Text("Hello!"),
+                  backgroundColor: Color.fromARGB(20, 1, 1, 1), // transparent
+                  elevation: 0, // remove shadow
+                  leading: IconButton(
+                    icon: Icon(Icons.arrow_back_ios),
+                    onPressed: () => _navigateBack(currentLinkImage),
+                  ),
+                  actions: <Widget>[
+                    IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                      ),
+                      onPressed: () => _editMode(),
+                    )
+                  ],
+                ),
+                left: 0,
+                top: 0,
+                right: 0)
+          ],
+        ));
   }
 
   @override
@@ -76,14 +101,17 @@ class _ImagerViewState extends State<ImagerView>
     viewModel.size = _getImagerScreen(_key);
   }
 
+  _editMode() {
+    Navigator.push(context,
+        GhostRoute<MaterialPageRoute>(builder: (context) => ImagerEdit()));
+  }
+
   _navigateBack(LinkImage currentLinkImage) {
     LinkImage backTo;
     try {
       backTo = currentLinkImage.owners.first;
-    } catch(Exception) {
-      
-    }
-    if(backTo != null) {
+    } catch (Exception) {}
+    if (backTo != null) {
       debugPrint("backTo: " + backTo.toString());
       setState(() {
         this.currentLinkImage = backTo;
@@ -160,3 +188,11 @@ class _ImagerViewState extends State<ImagerView>
   Note BoxFit.cover maintains aspect ratio wwhile BoxFit.fill distorts it.
   BoxFit.cover is just like apsectFill in nativescript!
 */
+
+class _ImagerEditState extends State<ImagerView> {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return null;
+  }
+}

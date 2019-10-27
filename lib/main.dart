@@ -1,7 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_linkimager/Types.dart';
+import 'package:flutter_linkimager/ViewModel.dart';
 import 'package:flutter_linkimager/app/activities/ImagerView.dart';
+import 'package:flutter_linkimager/mocks/ProjectsMock.dart';
 
 void main() => runApp(MyApp());
 
@@ -41,6 +44,9 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
+
+  final LinkImage project = Projects.one;
+  final ViewModel viewModel = ViewModel();
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -101,7 +107,16 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.display1,
             ),
-            RaisedButton(onPressed: () { debugPrint("pressed"); Navigator.push(context, MaterialPageRoute(builder: (context) => ImagerView())); }, )
+            RaisedButton(
+              onPressed: () {
+                debugPrint("pressed");
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ImagerView(
+                            this.widget.project, this.widget.viewModel)));
+              },
+            )
           ],
         ),
       ),

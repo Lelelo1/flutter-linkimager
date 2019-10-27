@@ -17,7 +17,13 @@ class _ImagerEditState extends State<ImagerEdit> {
   Widget build(BuildContext context) {
     //this.widget.
     return Scaffold(
-      body: null
+      body: FractionallySizedBox(
+        widthFactor: 1,
+        heightFactor: 1,
+        child: Container(
+          color: Color.fromARGB(100, 80, 80, 120),
+        ),
+      ),
     );
   }
   
