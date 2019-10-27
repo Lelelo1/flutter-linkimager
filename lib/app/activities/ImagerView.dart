@@ -51,16 +51,22 @@ class _ImagerViewState extends State<ImagerView>
           heightFactor: 1,
           key: _key,
         ),
-        Positioned(child: AppBar(
+        Positioned(
+          child: AppBar(
             title: Text("Hello!"),
-            backgroundColor: Color.fromARGB(20, 1, 1, 1),
-            elevation: 0,
-          ),
+            backgroundColor: Color.fromARGB(20, 1, 1, 1), // transparent
+            elevation: 0, // remove shadow
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios),
+              onPressed: () => _navigateBack(currentLinkImage),
+              )
+            ),
           left: 0,
           top: 0,
           right: 0,
-        )
-      ]),
+          )
+        ]
+      ),
     );
   }
 
@@ -68,6 +74,21 @@ class _ImagerViewState extends State<ImagerView>
   void afterFirstLayout(BuildContext context) {
     debugPrint("setting imagerScreen size");
     viewModel.size = _getImagerScreen(_key);
+  }
+
+  _navigateBack(LinkImage currentLinkImage) {
+    LinkImage backTo;
+    try {
+      backTo = currentLinkImage.owners.first;
+    } catch(Exception) {
+      
+    }
+    if(backTo != null) {
+      debugPrint("backTo: " + backTo.toString());
+      setState(() {
+        this.currentLinkImage = backTo;
+      });
+    }
   }
 
   Size _getImagerScreen(GlobalKey key) {
@@ -104,7 +125,10 @@ class _ImagerViewState extends State<ImagerView>
 
   _areaPressed(Linkable link) {
     setState(() {
-      currentLinkImage = LinkImage(link.media, link.url, link.percentRectangle);
+      var to = LinkImage(link.media, link.url, link.percentRectangle);
+      to.owners = link.owners;
+      to.links = link.links;
+      currentLinkImage = to;
     });
   }
 
