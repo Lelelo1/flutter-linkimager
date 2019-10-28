@@ -10,5 +10,7 @@ class ViewModel = _ViewModel with _$ViewModel;
 
 abstract class _ViewModel with Store{
   @observable
-  Size size = Size(0, 0);
+  Size screenSize = Size(0, 0);
+  @observable
+  Size appBarSize = Size(0, 0);
 }

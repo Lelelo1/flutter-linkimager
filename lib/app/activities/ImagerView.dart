@@ -28,11 +28,11 @@ class _ImagerViewState extends State<ImagerView>
     this.viewModel = viewModel;
 
     autorun((_) {
-      debugPrint("size changed to: " + viewModel.size.toString());
+      debugPrint("size changed to: " + viewModel.screenSize.toString());
     });
   }
 
-  GlobalKey _key = GlobalKey();
+  GlobalKey _screenKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -52,23 +52,29 @@ class _ImagerViewState extends State<ImagerView>
                     )),
               widthFactor: 1,
               heightFactor: 1,
-              key: _key,
+              key: _screenKey,
             ),
-            Align(
-              child: Column(
-                children: <Widget>[
-                  Material(
+            Positioned(
+              child: Container(
+                child: Column(
+                  children: <Widget>[
+                    Material(
                       child: IconButton(
-                    icon: Icon(Icons.text_fields),
-                    onPressed: () {
-                      debugPrint("pressed text!");
-                    },
-                  ),
-                  color: Color.fromARGB(0, 0, 0, 0),
-                  )
-                ],
+                        icon: Icon(Icons.text_fields),
+                        onPressed: () {
+                          debugPrint("pressed text!");
+                        },
+                      ),
+                      color: Color.fromARGB(0, 0, 0, 0),
+                    )
+                  ],
+                ),
+                color: Color.fromARGB(100, 20, 40, 80),
               ),
-              alignment: Alignment.centerRight,
+              left: 200,
+              right: 0,
+              top: 100,
+              bottom: 0,
             ),
             Positioned(
                 child: AppBar(
@@ -98,7 +104,7 @@ class _ImagerViewState extends State<ImagerView>
   @override
   void afterFirstLayout(BuildContext context) {
     debugPrint("setting imagerScreen size");
-    viewModel.size = _getImagerScreen(_key);
+    viewModel.screenSize = _getImagerScreen(_screenKey);
   }
 
   _editMode() {
@@ -131,21 +137,21 @@ class _ImagerViewState extends State<ImagerView>
   List<Widget> areas(List<Linkable> links) {
     debugPrint("links size: " + links.length.toString());
     // getting weird smaller sized readin from this: var query = MediaQuery.of(context);
-    debugPrint("size is; " + viewModel.size.toString());
+    debugPrint("size is; " + viewModel.screenSize.toString());
     return links
         .map((link) => Observer(
               builder: (_) => Positioned(
                 child: GestureDetector(
                   child: Image.network(
                     link.url,
-                    width: _getWidth(link.percentRectangle.widthPercentage),
-                    height: _getHeight(link.percentRectangle.heightPercentage),
-                    fit: BoxFit.fill,
+                    width: Screen.getWidth(link.percentRectangle, viewModel),
+                    height: Screen.getHeight(link.percentRectangle, viewModel),
+                    fit: BoxFit.cover,
                   ),
                   onTap: () => _areaPressed(link),
                 ),
-                left: _getX(link.percentRectangle.xPercentage),
-                top: _getY(link.percentRectangle.yPercentage),
+                left: Screen.getX(link.percentRectangle, viewModel),
+                top: Screen.getY(link.percentRectangle, viewModel),
               ),
             ))
         .toList();
@@ -159,40 +165,8 @@ class _ImagerViewState extends State<ImagerView>
       currentLinkImage = to;
     });
   }
-
-  double _getX(double percent) {
-    var x = percent * viewModel.size.width;
-    debugPrint("x: " + x.toString());
-    return x;
-  }
-
-  double _getY(double percent) {
-    var y = percent * viewModel.size.height;
-    debugPrint("y: " + y.toString());
-    return y;
-  }
-
-  double _getWidth(double percent) {
-    var w = percent * viewModel.size.width;
-    debugPrint("w: " + w.toString());
-    return w;
-  }
-
-  double _getHeight(double percent) {
-    var h = percent * viewModel.size.height;
-    debugPrint("h: " + h.toString());
-    return h;
-  }
 }
 /*
   Note BoxFit.cover maintains aspect ratio wwhile BoxFit.fill distorts it.
   BoxFit.cover is just like apsectFill in nativescript!
 */
-
-class _ImagerEditState extends State<ImagerView> {
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return null;
-  }
-}
