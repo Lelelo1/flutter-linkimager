@@ -42,4 +42,21 @@ mixin _$ViewModel on _ViewModel, Store {
       _$appBarSizeAtom.reportChanged();
     }, _$appBarSizeAtom, name: '${_$appBarSizeAtom.name}_set');
   }
+
+  final _$statusBarHeightAtom = Atom(name: '_ViewModel.statusBarHeight');
+
+  @override
+  double get statusBarHeight {
+    _$statusBarHeightAtom.context.enforceReadPolicy(_$statusBarHeightAtom);
+    _$statusBarHeightAtom.reportObserved();
+    return super.statusBarHeight;
+  }
+
+  @override
+  set statusBarHeight(double value) {
+    _$statusBarHeightAtom.context.conditionallyRunInAction(() {
+      super.statusBarHeight = value;
+      _$statusBarHeightAtom.reportChanged();
+    }, _$statusBarHeightAtom, name: '${_$statusBarHeightAtom.name}_set');
+  }
 }

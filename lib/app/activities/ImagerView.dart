@@ -29,9 +29,10 @@ class _ImagerViewState extends State<ImagerView>
 
     autorun((_) {
       debugPrint("size changed to: " + viewModel.screenSize.toString());
+      debugPrint("statusBarHeight changed to "  + viewModel.statusBarHeight.toString());
     });
   }
-
+  GlobalKey _appBarKey = GlobalKey();
   GlobalKey _screenKey = GlobalKey();
 
   @override
@@ -55,7 +56,7 @@ class _ImagerViewState extends State<ImagerView>
               key: _screenKey,
             ),
             Positioned(
-              child: Container(
+              child: Observer(builder: (_) => Container(
                 child: Column(
                   children: <Widget>[
                     Material(
@@ -70,11 +71,15 @@ class _ImagerViewState extends State<ImagerView>
                   ],
                 ),
                 color: Color.fromARGB(100, 20, 40, 80),
+                margin: EdgeInsets.only(left: SideBar.getLeftMargin(viewModel)),
               ),
-              left: 200,
+            ),
+              
               right: 0,
-              top: 100,
+              top: SideBar.getY(viewModel),
               bottom: 0,
+              width: SideBar.getWidth(viewModel),
+              
             ),
             Positioned(
                 child: AppBar(
@@ -93,18 +98,26 @@ class _ImagerViewState extends State<ImagerView>
                       onPressed: () => _editMode(),
                     )
                   ],
+                  key: _appBarKey,
                 ),
                 left: 0,
                 top: 0,
-                right: 0)
+                right: 0,
+            )
           ],
         ));
   }
-
+  double getSideBarWidth() {
+    debugPrint("sideBarWidth: " + viewModel.appBarSize.height.toString());
+    return viewModel.appBarSize.height;
+  } 
   @override
   void afterFirstLayout(BuildContext context) {
-    debugPrint("setting imagerScreen size");
-    viewModel.screenSize = _getImagerScreen(_screenKey);
+    debugPrint("setting appBar size and screen size");
+    viewModel.appBarSize = AfterLayout.getSizeOf(_appBarKey);
+    viewModel.screenSize = AfterLayout.getSizeOf(_screenKey);
+    viewModel.statusBarHeight = MediaQuery.of(context).padding.top;
+    debugPrint("statusBarHeight: " + viewModel.statusBarHeight.toString());
   }
 
   _editMode() {
@@ -123,15 +136,6 @@ class _ImagerViewState extends State<ImagerView>
         this.currentLinkImage = backTo;
       });
     }
-  }
-
-  Size _getImagerScreen(GlobalKey key) {
-    RenderBox box = key.currentContext.findRenderObject();
-    debugPrint("got imagerRectangle: " +
-        box.size.width.toString() +
-        ", " +
-        box.size.height.toString());
-    return Size(box.size.width, box.size.height);
   }
 
   List<Widget> areas(List<Linkable> links) {

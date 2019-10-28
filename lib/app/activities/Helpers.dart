@@ -45,3 +45,25 @@ class Screen  {
     return h;
   }
 }
+
+class AfterLayout {
+  static Size getSizeOf(GlobalKey key) {
+    RenderBox box = key.currentContext.findRenderObject();
+    return box.size;
+  }
+}
+
+class SideBar {
+  static getY(ViewModel viewModel) {
+    return viewModel.appBarSize.height;
+  }
+  static getWidth(ViewModel viewModel) {
+    return viewModel.appBarSize.height;
+  }
+  static getHeight(ViewModel viewModel) {
+    
+  }
+  static getLeftMargin(ViewModel viewModel) {
+    return viewModel.statusBarHeight;
+  }
+}
