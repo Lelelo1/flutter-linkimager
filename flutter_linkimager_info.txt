@@ -1,0 +1,9 @@
+Flutter-linkimager
+
+Use snapchat api: to get editing tools
+Social share: to share html projects
+
+CameraRoute: Have a round button for sound, image and video take. With camera view
+
+Have a ImagePreview route where linkimages can be found, or make a separate app with that
+That 

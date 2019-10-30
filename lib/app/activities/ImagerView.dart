@@ -19,17 +19,22 @@ class ImagerView extends StatefulWidget {
   State<StatefulWidget> createState() => _ImagerViewState(project, viewModel);
 }
 
+enum Activity { view, build, take }
+
 class _ImagerViewState extends State<ImagerView>
     with AfterLayoutMixin<ImagerView> {
   LinkImage currentLinkImage;
   ViewModel viewModel;
+  Activity _activity = Activity.view;
+
   _ImagerViewState(LinkImage project, ViewModel viewModel) {
     this.currentLinkImage = project;
     this.viewModel = viewModel;
 
     autorun((_) {
       debugPrint("size changed to: " + viewModel.screenSize.toString());
-      debugPrint("statusBarHeight changed to "  + viewModel.statusBarHeight.toString());
+      debugPrint(
+          "statusBarHeight changed to " + viewModel.statusBarHeight.toString());
     });
   }
   GlobalKey _appBarKey = GlobalKey();
@@ -41,88 +46,119 @@ class _ImagerViewState extends State<ImagerView>
         onWillPop: () async => false,
         child: Stack(
           children: <Widget>[
-            FractionallySizedBox(
-              child: Stack(
-                  children: List.from(areas(currentLinkImage.links))
-                    ..insert(
-                      0,
-                      Image.network(currentLinkImage.url,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover),
-                    )),
-              widthFactor: 1,
-              heightFactor: 1,
-              key: _screenKey,
-            ),
+            renderScreen(),
+            renderSideBar(),
             Positioned(
-              child: Observer(builder: (_) => Container(
-                child: Column(
-                  children: <Widget>[
-                    Material(
-                      child: IconButton(
-                        icon: Icon(Icons.text_fields),
-                        onPressed: () {
-                          debugPrint("pressed text!");
-                        },
-                      ),
-                      color: Color.fromARGB(0, 0, 0, 0),
-                    )
-                  ],
+              child: AppBar(
+                title: Text("Hello!"),
+                backgroundColor: Color.fromARGB(20, 1, 1, 1), // transparent
+                elevation: 0, // remove shadow
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back_ios),
+                  onPressed: () => _navigateBack(currentLinkImage),
                 ),
-                color: Color.fromARGB(100, 20, 40, 80),
-                margin: EdgeInsets.only(left: SideBar.getLeftMargin(viewModel)),
+                actions: <Widget>[
+                  IconButton(
+                    icon: Icon(
+                      Icons.edit,
+                    ),
+                    onPressed: () => _changeActivity(),
+                  )
+                ],
+                key: _appBarKey,
               ),
-            ),
-              
+              left: 0,
+              top: 0,
               right: 0,
-              top: SideBar.getY(viewModel),
-              bottom: 0,
-              width: SideBar.getWidth(viewModel),
-              
-            ),
-            Positioned(
-                child: AppBar(
-                  title: Text("Hello!"),
-                  backgroundColor: Color.fromARGB(20, 1, 1, 1), // transparent
-                  elevation: 0, // remove shadow
-                  leading: IconButton(
-                    icon: Icon(Icons.arrow_back_ios),
-                    onPressed: () => _navigateBack(currentLinkImage),
-                  ),
-                  actions: <Widget>[
-                    IconButton(
-                      icon: Icon(
-                        Icons.edit,
-                      ),
-                      onPressed: () => _editMode(),
-                    )
-                  ],
-                  key: _appBarKey,
-                ),
-                left: 0,
-                top: 0,
-                right: 0,
             )
           ],
         ));
   }
+
+  Widget renderScreen() {
+    List<Widget> content = [Column()];
+    if (this._activity == Activity.view || this._activity == Activity.build) {
+      content.clear();
+      content = renderContent();
+    }
+
+    return FractionallySizedBox(
+      child: Stack(children: content),
+      widthFactor: 1,
+      heightFactor: 1,
+      key: _screenKey,
+    );
+  }
+
+  List<Widget> renderContent() {
+    var color;
+    if (_activity == Activity.view) {
+      color = Color.fromARGB(0, 0, 0, 0);
+    }
+    return List.from(areas(currentLinkImage.links, color))
+      ..insert(
+        0,
+        Image.network(
+          currentLinkImage.url,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+        ),
+      );
+  }
+
+  Widget renderSideBar() {
+    Widget sideBar = Column();
+    if(_activity == Activity.build) {
+      sideBar = Observer(
+          builder: (_) => Positioned(
+                child: Container(
+                  child: Column(
+                    children: <Widget>[
+                      Material(
+                        child: IconButton(
+                          icon: Icon(Icons.text_fields),
+                          onPressed: () {
+                            debugPrint("pressed text!");
+                          },
+                        ),
+                        color: Color.fromARGB(0, 0, 0, 0),
+                      )
+                    ],
+                  ),
+                  color: Color.fromARGB(100, 20, 40, 80),
+                  margin:
+                      EdgeInsets.only(left: SideBar.getLeftMargin(viewModel)),
+                ),
+                right: 0,
+                top: SideBar.getY(viewModel),
+                bottom: 0,
+                width: SideBar.getWidth(viewModel),
+              )
+            );
+    }
+    return sideBar;
+  }
+
   double getSideBarWidth() {
     debugPrint("sideBarWidth: " + viewModel.appBarSize.height.toString());
     return viewModel.appBarSize.height;
-  } 
-  @override
-  void afterFirstLayout(BuildContext context) {
-    debugPrint("setting appBar size and screen size");
-    viewModel.appBarSize = AfterLayout.getSizeOf(_appBarKey);
-    viewModel.screenSize = AfterLayout.getSizeOf(_screenKey);
-    viewModel.statusBarHeight = MediaQuery.of(context).padding.top;
-    debugPrint("statusBarHeight: " + viewModel.statusBarHeight.toString());
   }
 
-  _editMode() {
+  _changeActivity() {
+    try {
+      setState(() {
+        _activity = Activity.values[_activity.index + 1];
+      });
+    } catch(Exception) {
+      setState(() {
+        _activity = Activity.values[0];
+      });
+    }
+    /*
     Navigator.push(context,
         GhostRoute<MaterialPageRoute>(builder: (context) => ImagerEdit()));
+        */
   }
 
   _navigateBack(LinkImage currentLinkImage) {
@@ -138,7 +174,7 @@ class _ImagerViewState extends State<ImagerView>
     }
   }
 
-  List<Widget> areas(List<Linkable> links) {
+  List<Widget> areas(List<Linkable> links, Color color) {
     debugPrint("links size: " + links.length.toString());
     // getting weird smaller sized readin from this: var query = MediaQuery.of(context);
     debugPrint("size is; " + viewModel.screenSize.toString());
@@ -151,6 +187,7 @@ class _ImagerViewState extends State<ImagerView>
                     width: Screen.getWidth(link.percentRectangle, viewModel),
                     height: Screen.getHeight(link.percentRectangle, viewModel),
                     fit: BoxFit.cover,
+                    color: color,
                   ),
                   onTap: () => _areaPressed(link),
                 ),
@@ -169,7 +206,17 @@ class _ImagerViewState extends State<ImagerView>
       currentLinkImage = to;
     });
   }
+
+  @override
+  void afterFirstLayout(BuildContext context) {
+    debugPrint("setting appBar size and screen size");
+    viewModel.appBarSize = AfterLayout.getSizeOf(_appBarKey);
+    viewModel.screenSize = AfterLayout.getSizeOf(_screenKey);
+    viewModel.statusBarHeight = MediaQuery.of(context).padding.top;
+    debugPrint("statusBarHeight: " + viewModel.statusBarHeight.toString());
+  }
 }
+
 /*
   Note BoxFit.cover maintains aspect ratio wwhile BoxFit.fill distorts it.
   BoxFit.cover is just like apsectFill in nativescript!
