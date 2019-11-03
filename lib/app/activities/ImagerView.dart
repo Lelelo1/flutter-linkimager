@@ -48,29 +48,7 @@ class _ImagerViewState extends State<ImagerView>
           children: <Widget>[
             renderScreen(),
             renderSideBar(),
-            Positioned(
-              child: AppBar(
-                title: Text("Hello!"),
-                backgroundColor: Color.fromARGB(20, 1, 1, 1), // transparent
-                elevation: 0, // remove shadow
-                leading: IconButton(
-                  icon: Icon(Icons.arrow_back_ios),
-                  onPressed: () => _navigateBack(currentLinkImage),
-                ),
-                actions: <Widget>[
-                  IconButton(
-                    icon: Icon(
-                      Icons.edit,
-                    ),
-                    onPressed: () => _changeActivity(),
-                  )
-                ],
-                key: _appBarKey,
-              ),
-              left: 0,
-              top: 0,
-              right: 0,
-            )
+            renderAppBar()
           ],
         ));
   }
@@ -139,7 +117,50 @@ class _ImagerViewState extends State<ImagerView>
     }
     return sideBar;
   }
-
+  Widget renderAppBar() {
+    Widget appBar = Column();
+    if(_activity == Activity.build || _activity == Activity.view || _activity == Activity.take) {
+      appBar = Positioned(
+              child: AppBar(
+                title: Text("Hello!"),
+                backgroundColor: Color.fromARGB(20, 1, 1, 1), // transparent
+                elevation: 0, // remove shadow
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back_ios),
+                  onPressed: () => _navigateBack(currentLinkImage),
+                ),
+                actions: <Widget>[
+                  IconButton(
+                    icon: Icon(
+                      _activityButton()
+                    ),
+                    onPressed: () => _changeActivity(),
+                  )
+                ],
+                key: _appBarKey,
+              ),
+              left: 0,
+              top: 0,
+              right: 0,
+            );
+    }
+    return appBar;
+  }
+  IconData _activityButton() {
+    IconData icon;
+    switch(_activity) {
+      case Activity.view:
+        icon = Icons.build;
+      break;
+      case Activity.build:
+        icon = Icons.image;
+        break;
+      case Activity.take:
+        return icon; // 
+        break;
+    }
+    return icon;
+  }
   double getSideBarWidth() {
     debugPrint("sideBarWidth: " + viewModel.appBarSize.height.toString());
     return viewModel.appBarSize.height;
@@ -150,6 +171,11 @@ class _ImagerViewState extends State<ImagerView>
       setState(() {
         _activity = Activity.values[_activity.index + 1];
       });
+      if(_activity == Activity.take) {
+        setState(() {
+          _activity = Activity.values[_activity.index + 1];
+        });
+      }
     } catch(Exception) {
       setState(() {
         _activity = Activity.values[0];
