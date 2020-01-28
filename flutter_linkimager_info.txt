@@ -5,5 +5,25 @@ Social share: to share html projects
 
 CameraRoute: Have a round button for sound, image and video take. With camera view
 
-Have a ImagePreview route where linkimages can be found, or make a separate app with that
-That 
+To do:
+Add animation to areas in view mode
+// In build mode add microphone to record, bottom right, hold to record.
+Create areas, in build mode.
+
+Questions:
+How to go camera, select gallery, search photo
+Check if able to grab videos from youtube.
+
+General:
+recordSoundArea should probably act differently than photo and video. 
+
+Solutions:
+Use tree selections for all media. Search, take, phone. 
+Show a small context menu next to the area selected.
+
+Make draggable text and snapshot the stack widget - set resource url to the image.
+This allows text to be removed, moved, reedited. (Use flutter for website)
+
+Web:
+https://flutter.dev/docs/get-started/web
+

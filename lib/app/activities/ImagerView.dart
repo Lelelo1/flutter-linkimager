@@ -1,6 +1,5 @@
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_linkimager/app/activities/ImagerEdit.dart';
 
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
@@ -16,18 +15,18 @@ class ImagerView extends StatefulWidget {
   ImagerView(this.project, this.viewModel);
 
   @override
-  State<StatefulWidget> createState() => _ImagerViewState(project, viewModel);
+  State<StatefulWidget> createState() => ImagerViewState(project, viewModel);
 }
 
 enum Activity { view, build, take }
 
-class _ImagerViewState extends State<ImagerView>
+class ImagerViewState extends State<ImagerView>
     with AfterLayoutMixin<ImagerView> {
   LinkImage currentLinkImage;
   ViewModel viewModel;
-  Activity _activity = Activity.view;
-
-  _ImagerViewState(LinkImage project, ViewModel viewModel) {
+  Activity activity = Activity.view;
+  Stack rootStack;
+  ImagerViewState(LinkImage project, ViewModel viewModel) {
     this.currentLinkImage = project;
     this.viewModel = viewModel;
 
@@ -55,13 +54,13 @@ class _ImagerViewState extends State<ImagerView>
 
   Widget renderScreen() {
     List<Widget> content = [Column()];
-    if (this._activity == Activity.view || this._activity == Activity.build) {
+    if (this.activity == Activity.view || this.activity == Activity.build) {
       content.clear();
       content = renderContent();
     }
-
+    rootStack = Stack(children: content);
     return FractionallySizedBox(
-      child: Stack(children: content),
+      child: rootStack,
       widthFactor: 1,
       heightFactor: 1,
       key: _screenKey,
@@ -70,11 +69,11 @@ class _ImagerViewState extends State<ImagerView>
 
   List<Widget> renderContent() {
     var color;
-    if (_activity == Activity.view) {
+    if (activity == Activity.view) {
       color = Color.fromARGB(0, 0, 0, 0);
     }
     return List.from(areas(currentLinkImage.links, color))
-      ..insert(
+      ..insert( // puts image at the bottom z index 0, and puts all areas on top
         0,
         Image.network(
           currentLinkImage.url,
@@ -87,7 +86,7 @@ class _ImagerViewState extends State<ImagerView>
 
   Widget renderSideBar() {
     Widget sideBar = Column();
-    if(_activity == Activity.build) {
+    if(activity == Activity.build) {
       sideBar = Observer(
           builder: (_) => Positioned(
                 child: Container(
@@ -119,7 +118,7 @@ class _ImagerViewState extends State<ImagerView>
   }
   Widget renderAppBar() {
     Widget appBar = Column();
-    if(_activity == Activity.build || _activity == Activity.view || _activity == Activity.take) {
+    if(activity == Activity.build || activity == Activity.view || activity == Activity.take) {
       appBar = Positioned(
               child: AppBar(
                 title: Text("Hello!"),
@@ -148,7 +147,7 @@ class _ImagerViewState extends State<ImagerView>
   }
   IconData _activityButton() {
     IconData icon;
-    switch(_activity) {
+    switch(activity) {
       case Activity.view:
         icon = Icons.build;
       break;
@@ -169,16 +168,16 @@ class _ImagerViewState extends State<ImagerView>
   _changeActivity() {
     try {
       setState(() {
-        _activity = Activity.values[_activity.index + 1];
+        activity = Activity.values[activity.index + 1];
       });
-      if(_activity == Activity.take) {
+      if(activity == Activity.take) {
         setState(() {
-          _activity = Activity.values[_activity.index + 1];
+          activity = Activity.values[activity.index + 1];
         });
       }
     } catch(Exception) {
       setState(() {
-        _activity = Activity.values[0];
+        activity = Activity.values[0];
       });
     }
     /*
@@ -224,13 +223,11 @@ class _ImagerViewState extends State<ImagerView>
         .toList();
   }
 
+  _getAreaAction(Linkable link) {
+    
+  }
   _areaPressed(Linkable link) {
-    setState(() {
-      var to = LinkImage(link.media, link.url, link.percentRectangle);
-      to.owners = link.owners;
-      to.links = link.links;
-      currentLinkImage = to;
-    });
+    
   }
 
   @override
